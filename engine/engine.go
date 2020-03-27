@@ -23,12 +23,14 @@ var Engine = &engine{}
 func (e *engine) Run(config *define.TaskConfig) {
 	e.config = config
 	e.initConfig() // 初始化系统
+	Pool.InitPool(config.Pool)
 	chTask := make(chan int, 1000)
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	// 任务下发
 	go e.TaskRelease(chTask, &wg)
 	// 任务执行
+	go e.TaskRun(chTask, &wg)
 
 	wg.Wait()
 }

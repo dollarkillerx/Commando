@@ -37,7 +37,24 @@ loop:
 	for {
 		select {
 		case _, ok := <-ch:
-
+			task<-1
+			wg2.Add(1)
+			go func() {
+				defer func() {
+					<-task
+					wg2.Done()
+					get, err := Pool.Get()
+					if err != nil {
+						log.Println(err)
+						return
+					}
+					defer Pool.Put(get)
+					err = get.Send(e.header, e.body)
+					if err != nil {
+						log.Println(err)
+					}
+				}()
+			}()
 			if !ok {
 				wg2.Wait()
 				break loop
